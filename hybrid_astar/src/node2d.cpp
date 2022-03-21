@@ -8,6 +8,10 @@ const int Node2D::dir = 8;
 const int Node2D::dx[] = { -1, -1, 0, 1, 1, 1, 0, -1 };
 const int Node2D::dy[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
 
+const int  Node2D::radius = 3;
+const int Node2D::dir_x =2*radius+1; 
+const int Node2D::dir_y =2*radius+1; 
+
 //###################################################
 //                                         IS ON GRID
 //###################################################
@@ -28,6 +32,11 @@ Node2D* Node2D::createSuccessor(const int i) {
   return new Node2D(xSucc, ySucc, g, 0, this);
 }
 
+Node2D* Node2D::createSuccessor(const int i, const int j) {
+  int xSucc = x - Node2D::radius + i;
+  int ySucc = y - Node2D::radius + j;
+  return new Node2D(xSucc, ySucc, g, 0, this);
+}
 //###################################################
 //                                 2D NODE COMPARISON
 //###################################################

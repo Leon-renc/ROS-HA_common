@@ -172,7 +172,7 @@ public:
         }
     }
   }
-  
+  void getObsInCircle(Node2D *current, int r ,std::vector<Node2D> *ptr );
 
 private:
   /// The occupancy grid

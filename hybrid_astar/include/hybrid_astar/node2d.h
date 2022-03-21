@@ -92,6 +92,7 @@ class Node2D {
   // SUCCESSOR CREATION
   /// Creates a successor on a eight-connected grid.
   Node2D* createSuccessor(const int i);
+  Node2D* createSuccessor(const int i, const int r );
 
   // CONSTANT VALUES
   /// Number of possible directions
@@ -100,6 +101,10 @@ class Node2D {
   static const int dx[];
   /// Possible movements in the y direction
   static const int dy[];
+
+  static const int dir_x;
+  static const int dir_y;
+  static const int radius;
 
  private:
   /// the x position
