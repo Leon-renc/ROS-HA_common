@@ -152,7 +152,7 @@ void Planner::setMap(nav_msgs::OccupancyGrid map)
         {
             validStart = false;
         }
-         visualization.publishMainRoad();
+         //visualization.publishMainRoad();
         plan();
     }
 }
