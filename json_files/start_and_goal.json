@@ -1,0 +1,15 @@
+{
+   "json_switch_handle" : 0,
+   "start_x" : 586.146,
+   "start_y" : 145.683,
+   "start_yaw" : 4.84957,
+   "goal_x" : 544.444,
+   "goal_y" : 23.4243,
+   "goal_yaw" : 3.46238,
+   "alpout_start_x" : 45.52,
+   "alpout_start_y" : 165.43,
+   "alpout_start_yaw" :1.93,
+   "alpout_goal_x" : 87,
+   "alpout_goal_y" : 204,
+   "alpout_goal_yaw" : 0.39
+}
