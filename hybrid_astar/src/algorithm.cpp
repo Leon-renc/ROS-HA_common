@@ -622,7 +622,12 @@ void updateH(Node3D &start, const Node3D &goal, Node2D *nodes2D, float *dubinsLo
     //--Mapping debug--
     //nodes2D[(int)start.getY() * width + (int)start.getX()].setG(aStar(goal2d, start2d, nodes2D, width, height, configurationSpace, visualization));
      // ros::Time ta_start = ros::Time::now();
-    nodes2D[((int)((start.getY() - map_origin_y) / map_resolution)) * width + ((int)((start.getX() - map_origin_x) / map_resolution))].setG(aStar( goal2d, start2d, nodes2D, width, height, configurationSpace, visualization, AlpOut));
+
+     /*common A*/
+    //nodes2D[((int)((start.getY() - map_origin_y) / map_resolution)) * width + ((int)((start.getX() - map_origin_x) / map_resolution))].setG(aStar( goal2d, start2d, nodes2D, width, height, configurationSpace, visualization, AlpOut));
+    /*VSLA*/
+    nodes2D[((int)((start.getY() - map_origin_y) / map_resolution)) * width + ((int)((start.getX() - map_origin_x) / map_resolution))].setG(aStar( goal2d, start2d, nodes2D, width, height, configurationSpace, visualization, AlpOut, Node2D::radius));
+
      // ros::Time ta_end = ros::Time::now();
       //std::cout << "A* total time = " << (ta_end - ta_start)*1000 << "ms" << std::endl;  
     // ros::Time t1 = ros::Time::now();
@@ -859,7 +864,7 @@ float aStar(Node2D &start,
   int iPred, iSucc;
   float newG;
   static int invoke_conter = 0;
-  std::cout << "radius = " << radius << std::endl; 
+  std::cout << "  Now use VSLA and the radius = " << radius << std::endl; 
   //ROS_INFO("the invoked times of A* is(%d) ",++invoke_conter);
 
   // reset the open and closed list
@@ -947,6 +952,7 @@ float aStar(Node2D &start,
           {
             // create possible successor
             nSucc = nPred->createSuccessor(i,j);
+            iSucc = nSucc->setIdx(width);
 
             if( nSucc == nPred ){ continue; }
             // set index of the successor

@@ -58,7 +58,7 @@ public:
     // 2D collision test
     if (t == 99)
     {
-      return !grid.data[node->getIdx()];
+      return !grid.data[node->getIdx()]; 
     }
 
     if (true)

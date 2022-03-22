@@ -89,7 +89,7 @@ void Smoother::tracePath(const Node3D* node, int i, std::vector<Node3D> path) {
     this->path = path;
     return;
   }
-  std::cout << "node->getX()" << node->getX() << "node->getY()" << node->getY() << std::endl;
+  //std::cout << "node->getX()" << node->getX() << "node->getY()" << node->getY() << std::endl;
   i++;
   path.push_back(*node);
   tracePath(node->getPred(), i, path);
