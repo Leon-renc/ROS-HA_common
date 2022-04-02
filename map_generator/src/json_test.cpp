@@ -31,7 +31,7 @@ int main(int argc, char **argv)
   ros::Rate loop_rate(1.0);
   ros::Publisher occupancy_grid_pub = nh.advertise<nav_msgs::OccupancyGrid>("/map", 1);
   // std::string json_file_path = "/home/ding/2022haibo_ws/src/map_generator/src/s95_global_map.json";
-  std::string json_file_path = "/home/rcx/HA_common/src/map_generator/src/n95global_map.json";
+  std::string json_file_path = "/home/rcx/HA_common/src/map_generator/src/n95global_map_empty.json";
   nav_msgs::OccupancyGrid global_map;
 
   Json::Reader json_reader;

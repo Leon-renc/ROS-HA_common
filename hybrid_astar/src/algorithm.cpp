@@ -11,7 +11,7 @@ void updateH(Node3D &start, const Node3D &goal, Node2D *nodes2D, float *dubinsLo
 Node3D *reedssheppShot(Node3D &start, const Node3D &goal, CollisionDetection &configurationSpace);
 Node3D *dubinsShot(Node3D &start, const Node3D &goal, CollisionDetection &configurationSpace);
 bool straightLineToDevideMap(const Node3D &start, const Node3D &goal, float &k, float &b);
-
+bool dubinflag = Constants::dubinsShot;
 
 //###################################################
 //                                    NODE COMPARISON
@@ -56,11 +56,12 @@ Node3D *Algorithm::hybridAStar(Node3D &start,
     if(AlpOut)
   {
      onlyFoward = true; 
+     dubinflag =false;
   }
   // Number of possible directions, 3 for forward driving and an additional 3 for reversing
   int dir = onlyFoward ? 3 : 6;
    std::cout << "dir  " << dir << std::endl;
-  std::cout << "Dubin flag:  " << Constants::dubins << std::endl;
+  std::cout << "Dubin flag:  " << dubinflag << std::endl;
 
   //--DEBUG--
   //dir = 3;
@@ -234,7 +235,7 @@ Node3D *Algorithm::hybridAStar(Node3D &start,
           // {
           // }
         }
-        else if  (Constants::dubinsShot&& nPred->isInRange(goal)){
+        else if  (dubinflag && nPred->isInRange(goal)){
         //std::cout << "judege dubins" << std::endl;
         // ros::Time t0 = ros::Time::now();
           //cout<<"nPred   : "<<nPred->getX()<<'\t'<<nPred->getY()<<'\t'<<nPred->getT()<<endl;
@@ -267,7 +268,7 @@ Node3D *Algorithm::hybridAStar(Node3D &start,
         //std::cout << "dir:" << dir << std::endl; 
         //ros::Time  t_for = ros::Time::now();
         //std::cout << "except for time:" << (t_for-t_exp_for).toSec()*1000 << std::endl;
-        //std::cout << "for" << std::endl;
+       // std::cout << "start for" << std::endl;
         for (int i = 0; i < dir; i++)
         {
           // create possible successor
@@ -278,7 +279,7 @@ Node3D *Algorithm::hybridAStar(Node3D &start,
           // ensure successor is on grid and traversable
           if (nSucc->isOnGrid(width, height) && configurationSpace.isTraversable(nSucc))
           {
-
+              // std::cout << "nSucc->isOnGrid(width, height) && configurationSpace.isTraversable(nSucc)" << std::endl; 
             // ensure successor is not on closed list or it has the same index as the predecessor
             if (!nodes3D[iSucc].isClosed() || iPred == iSucc)
             {
@@ -298,6 +299,7 @@ Node3D *Algorithm::hybridAStar(Node3D &start,
                 //ros::Time  t_updateH = ros::Time::now();
                 //std::cout << "updateH in for" << std::endl;
                 updateH(*nSucc, goal, nodes2D, dubinsLookup, width, height, configurationSpace, visualization, AlpOut);
+                 //std::cout << "updateH" << std::endl; 
                 //std::cout << "updateH in for successfully" << std::endl;
                 //ros::Time  t_updateH_end = ros::Time::now();
                 //std::cout<<"updateH time(ms):"<<(t_updateH_end-t_updateH).toSec()*1000<<std::endl;
@@ -581,7 +583,7 @@ void updateH(Node3D &start, const Node3D &goal, Node2D *nodes2D, float *dubinsLo
 
   // if reversing is active use a
   //if ( Constants::reverse && !Constants::dubins)
-    if ( !AlpOut && !Constants::dubins)
+    if ( Constants::reverse && !Constants::dubins)
   {
     //    ros::Time t0 = ros::Time::now();
     ompl::base::ReedsSheppStateSpace reedsSheppPath(Constants::r);
@@ -615,6 +617,7 @@ void updateH(Node3D &start, const Node3D &goal, Node2D *nodes2D, float *dubinsLo
     //nodes2D[(int)start.getY() * width + (int)start.getX()].setG(aStar(goal2d, start2d, nodes2D, width, height, configurationSpace, visualization));
      // ros::Time ta_start = ros::Time::now();
     nodes2D[((int)((start.getY() - map_origin_y) / map_resolution)) * width + ((int)((start.getX() - map_origin_x) / map_resolution))].setG(aStar( goal2d, start2d, nodes2D, width, height, configurationSpace, visualization, AlpOut));
+    //std::cout << "astar" << std::endl; 
      // ros::Time ta_end = ros::Time::now();
       //std::cout << "A* total time = " << (ta_end - ta_start)*1000 << "ms" << std::endl;  
     // ros::Time t1 = ros::Time::now();

@@ -9,6 +9,9 @@ namespace Decision
     std::ifstream  json_file;
     Json::Value root;
     std::string json_file_path = "/home/rcx/HA_common/src/json_files/start_and_goal.json";
+
+    std::pair<float, float>  handin;
+
     DecisionMaker::DecisionMaker(param *initParam)
     {
         DM_Param = initParam;
@@ -112,16 +115,17 @@ namespace Decision
         x = root["start_x"].asFloat();
         y = root["start_y"].asFloat();
         yaw = root["start_yaw"].asFloat();
+
+        x =  handin.first;
+        y = handin.second;
     }
 
     if ( testflag_out  &&   root["json_switch_handle"].asBool() )
      {
-         x = root["alpout_start_x"].asFloat();
+        x = root["alpout_start_x"].asFloat();
         y = root["alpout_start_y"].asFloat();
         yaw = root["alpout_start_yaw"].asFloat();
     }
-        // x =  -68.25;
-        // y = 161.1;
         // yaw =  1.6;
 
 
@@ -162,19 +166,39 @@ namespace Decision
         float x = goalPoint->pose.position.x / HybridAStar::Constants::cellSize;
         float y = goalPoint->pose.position.y / HybridAStar::Constants::cellSize;
         float yaw = tf::getYaw(goalPoint->pose.orientation);
-
+    
+    //--------test2022.3.30-------------
         if (  root["json_switch_handle"].asBool() )
         {
             x = root["goal_x"].asFloat();
             y = root["goal_y"].asFloat();
             yaw = root["goal_yaw"].asFloat();
+
+          
+            float dist = y;
+            std::pair <int, int> projection_point(0,0);
+            int backward_dist = root["backward_dist"].asInt();
+            std::pair <float, float>   backward_point(projection_point.first - backward_dist, projection_point.second);
+            std::pair <float, float> unit_vector(cos(yaw), sin(yaw));
+            float vector_weight = root["vector_weight"].asFloat();  
+            std::pair <float, float> direction_to_projection( projection_point.first - backward_point.first, projection_point.second - backward_point.second );
+            float offset = direction_to_projection.first*vector_weight*unit_vector.first + direction_to_projection.second*vector_weight*unit_vector.second; 
+            std::pair <float, float>  handover_in(backward_point.first*(1+  (dist - 30)/(150 - 30))+offset, backward_point.second);
+            handin  = handover_in;
+            ROS_INFO("Offset is  (%.2f)", offset);
+           
         }
         
      if ( testflag_out   &&   root["json_switch_handle"].asBool() )
         {
-            x = root["alpout_goal_x"].asFloat();
-            y = root["alpout_goal_y"].asFloat();
+             x = root["alpout_goal_x"].asFloat();
+             y = root["alpout_goal_y"].asFloat();
             yaw = root["alpout_goal_yaw"].asFloat();
+
+    
+            x = handin.first - root["handover_down_dist"].asFloat();
+            y = handin.second + 20;
+
         }
 
         //  x = 512;
@@ -188,7 +212,6 @@ namespace Decision
         // x =  -20.25;
         // y = 176.1;
         // yaw =  0.01;
-
         ROS_INFO("Got a new goal at (%.2f, %.2f, %.2f)", x, y, yaw);
         int map_o_x = DM_Param->gridMap.info.origin.position.x ;
         int map_o_y = DM_Param->gridMap.info.origin.position.y;

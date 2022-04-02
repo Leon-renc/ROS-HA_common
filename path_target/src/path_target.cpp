@@ -59,10 +59,10 @@ void PathTarget::getGlobalPoints(const nav_msgs::Path global_points)
     nodePath[0].setT(nodePath[1].getT());
     nodePath[0].setPrim(4);
     nodePath.erase(nodePath.begin());
-    nodePath.erase(nodePath.end());
     // ROS_INFO("converse 144 !");
     std::vector<HybridAStar::Node3D> nodePath2;         // 存放混合A*路径上的关键点；
-    nodePath2.push_back(nodePath[0]);
+    
+    //nodePath2.push_back(nodePath[0]);
     float lastT = nodePath[1].getT() > 0 ? nodePath[1].getT() : 2 * M_PI + nodePath[1].getT();
     nodePath2.push_back(nodePath[1]); // 将终点作为关键点；
 
@@ -104,6 +104,7 @@ void PathTarget::getGlobalPoints(const nav_msgs::Path global_points)
         vertex.pose.position.y = nodePath2[i].getY() * HybridAStar::Constants::cellSize;
         //vertex.pose.position.z = 0;
         vertex.pose.position.z = nodePath2[i].getPrim() < 3 ? 1 : -1;
+        std::cout << "nodePath2[i].getX() :  " <<nodePath2[i].getX() << "       " <<"nodePath2[i].getY():" << nodePath2[i].getY() << std::endl;
         //--Mapping debug--
         vertex.header.frame_id = "path";
         // 这里rsshot的prim可能有问题

@@ -76,7 +76,7 @@ void Path::publishPathPoints(std::vector<Node3D> nodePath) //此处nodepath节�
         pathPoint.pose.position.z = nodePath[i].getT();
         pathPoint.pose.orientation.z = static_cast<float>(nodePath[i].getPrim());
         pathMsg.poses.push_back(pathPoint);
-        std::cout << "In path.cpp pubpathpoints: " << "pathPoint.pose.position.x" << pathPoint.pose.position.x << "pathPoint.pose.position.y" << pathPoint.pose.position.y <<std::endl;
+        //std::cout << "In path.cpp pubpathpoints: " << "pathPoint.pose.position.x" << pathPoint.pose.position.x << "pathPoint.pose.position.y" << pathPoint.pose.position.y <<std::endl;
     }
     pubPathPoints.publish(pathMsg);
     lastPath = pathMsg;

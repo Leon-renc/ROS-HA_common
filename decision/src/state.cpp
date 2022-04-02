@@ -497,7 +497,7 @@ namespace Decision
 
     void TerminalKeypointState::updateParam()
     {
-        getParam()->tarDisThresh = 0.5;
+        getParam()->tarDisThresh = 1;
         int length = getParam()->globalKeypoints.poses.size();
         int index = getParam()->targetIndex;
         geometry_msgs::PoseStamped nextKeypoint, lastKeypoint;
