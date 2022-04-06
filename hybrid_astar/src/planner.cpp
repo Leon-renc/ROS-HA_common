@@ -327,6 +327,22 @@ void Planner::plan()
         //PUBLISH CHOSEN POINTS
         // path.generatePoints(smoother.getPath());
         path.publishPathPoints(smoother.getPath());
+        if(ALPOut){
+            std::ofstream fpath;
+            std::string file_path = "/home/rcx/HA_common/src/json_files/alpout_path.json";
+           Json::Value root;
+           std::vector<Node3D> json_path = smoother.getPath();
+           for (auto iter = json_path.begin(); iter != json_path.end(); iter++)
+           {
+               int index = static_cast<int>((iter->getY()- map_origin_y)/map_resolution)*width + static_cast<int>((iter->getX() - map_origin_x)/map_resolution);
+               root["index"].append(index);
+           }
+           fpath.open(file_path);
+           Json::StyledWriter sw;
+            fpath << sw.write(root);
+           fpath.close();
+        }
+
          t0 = ros::Time::now();
         if (smooth_flag)
         {

@@ -32,16 +32,23 @@ int main(int argc, char **argv)
   ros::Publisher occupancy_grid_pub = nh.advertise<nav_msgs::OccupancyGrid>("/map", 1);
   // std::string json_file_path = "/home/ding/2022haibo_ws/src/map_generator/src/s95_global_map.json";
   std::string json_file_path = "/home/rcx/HA_common/src/map_generator/src/n95global_map_empty.json";
+
+  std::string alp_path =  "/home/rcx/HA_common/src/json_files/alpout_path.json";
   nav_msgs::OccupancyGrid global_map;
 
-  Json::Reader json_reader;
-  std::ifstream json_file;
+  Json::Reader json_reader, alp_reader;
+  std::ifstream json_file, alp_file;
   json_file.open(json_file_path);
-  Json::Value root;
+  alp_file.open(alp_path);
+  Json::Value root,alp_root;
 
   if (!json_reader.parse(json_file, root))
   {
     std::cout << "Error opening json file : " << json_file_path << std::endl;
+  }
+   if (!alp_reader.parse(alp_file, alp_root))
+  {
+    std::cout << "Error opening json file : " << alp_path << std::endl;
   }
 
   int width, height, size;
@@ -57,9 +64,14 @@ int main(int argc, char **argv)
 
   for (int i = 0; i < size; i++)
   {
-    global_map.data.push_back(root["data"][i].asInt());
+      global_map.data.push_back(root["data"][i].asInt()); 
   }
 
+  for (int j = 15; j < alp_root["index"].size()-15 ; j++)
+  {
+    global_map.data[alp_root["index"][j].asInt()] = 100;
+  }
+  
   while (ros::ok())
   {
     occupancy_grid_pub.publish(global_map);
