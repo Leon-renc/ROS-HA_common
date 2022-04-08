@@ -1,0 +1,22 @@
+{
+   "json_switch_handle" : 1,
+   "up_csv_path" :  "/home/rcx/HA_common/src/decision/json_files/up.csv",
+   "down_csv_path" :  "/home/rcx/HA_common/src/decision/json_files/down.csv",
+   "goal_x" : 2.74,
+   "goal_y" : 129.55,
+   "goal_yaw" : 1.66,
+   "backward_dist": 25,
+   "vector_weight" : 0.33,
+   "handover_down_dist" : 40,
+
+   "origin_handover_switch" : 0,
+   "origin_start_x" : 0,
+   "origin_start_y" : 0,
+   "origin_start_yaw" : 0,
+   "origin_goal_x" : 50,
+   "origin_goal_y" : 50,
+   "origin_goal_yaw" : 0,
+   "origin_alpout_goal_x" : 100,
+   "origin_alpout_goal_y" : 0,
+   "origin_alpout_goal_yaw" : 0
+}

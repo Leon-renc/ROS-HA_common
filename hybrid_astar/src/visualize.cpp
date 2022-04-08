@@ -306,18 +306,18 @@ void Visualize::publishMainRoad()
     float roadwidth = 20;
 
 
-    rightup.x =80.27096545;
-    rightup.y = 208.0396015;
-    midup.x = 25.65390247;
-    midup.y = 194.9126485;
-    leftup.x =-25.89232164;
-    leftup.y = 185.63267439;
-    rightdown.x =80.58567875;
-    rightdown.y = 197.772866;
-    middown.x = 48.81870882;
-    middown.y = 185.732378;
-    leftdown.x = -26.03537314;
-    leftdown.y = 168.0373124;
+    rightup.x =-64.449469468855966;
+    rightup.y = 171.840052177112057;
+    midup.x = -24.433196326913524;
+    midup.y = 182.727835534465584;
+    leftup.x =44.422259365478112;
+    leftup.y = 193.293857278769508;
+    leftdown.x =30.965881527285731;
+    leftdown.y = 206.897880946779509;
+    middown.x = 0.915529605119181;
+    middown.y = 201.021718340743234;
+    rightdown.x = -58.565284406992689;
+    rightdown.y =186.874308487219963;
 
 
     mainRoad.polygon.points.push_back(rightup);

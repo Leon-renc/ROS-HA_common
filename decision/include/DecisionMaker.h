@@ -1,9 +1,13 @@
 #ifndef DECISION_MAKER_H
 #define DECISION_MAKER_H
 
+#include <algorithm>
 #include <ros/ros.h>
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <string>
+#include <sstream>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Path.h>
@@ -12,6 +16,7 @@
 #include <tf/transform_datatypes.h>
 #include "state.h"
 #include "hybrid_astar/constants.h"
+#include "map"
 
 namespace Decision
 {
@@ -33,6 +38,14 @@ namespace Decision
         void setGlobalKeypoints(const nav_msgs::Path globalKeypoints_);
         void setCuspIndex(const std_msgs::Int8MultiArray cuspIndex);
         void setControlCmd(const vehicle_msgs::adm_lat controlCmd);
+        struct CSV_data
+        {
+            float x;
+            float y;
+            float heading;
+        };
+
+
 
     private:
         param *DM_Param;
@@ -44,6 +57,9 @@ namespace Decision
         TerminalKeypointState *term_kp_state;
         MissionCompleteState *complete_state;
         WaitingState *waiting_state;
+        
+        std::vector<CSV_data> up_road_;
+        std::vector<CSV_data> down_road_;
 
         ros::NodeHandle n;
         ros::Subscriber subStart;
@@ -54,6 +70,12 @@ namespace Decision
         ros::Subscriber subStartTime;
         ros::Subscriber subReplanFlag;
         ros::Subscriber subDwaConCmd;
+
+        void setMainRoad(std::string, std::string);
+        CSV_data getHandoverPoint(float, float, float, bool, float);
+
+        
+        
     };
 }
 #endif

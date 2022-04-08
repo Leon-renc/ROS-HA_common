@@ -1,5 +1,6 @@
 #include "DecisionMaker.h"
 #include <jsoncpp/json/json.h>
+#include <ros/package.h>
 
 
 
@@ -8,9 +9,9 @@ namespace Decision
     Json::Reader json_reader;
     std::ifstream  json_file;
     Json::Value root;
-    std::string json_file_path = "/home/rcx/HA_common/src/json_files/start_and_goal.json";
+    std::string json_file_path;
 
-    std::pair<float, float>  handin;
+    DecisionMaker::CSV_data  handin;
 
     DecisionMaker::DecisionMaker(param *initParam)
     {
@@ -66,12 +67,13 @@ namespace Decision
         subStartTime = n.subscribe("/hybrid_start_time", 1, &DecisionMaker::setStartTime, this);
         subReplanFlag = n.subscribe("/replan_flag", 1, &DecisionMaker::setReplanFlag, this);
         subDwaConCmd = n.subscribe("/dwa_planner/control_cmd", 1, &DecisionMaker::setControlCmd, this);
-
+    
+        json_file_path = ros::package::getPath("decision") + "/json_files/start_and_goal.json";
         json_file.open(json_file_path);
-      if (!json_reader.parse(json_file, root))
-     {
-        std::cout << "Error opening json file  : " << json_file_path << std::endl;
-     }
+        if (!json_reader.parse(json_file, root))
+        {
+            std::cout << "Error opening json file  : " << json_file_path << std::endl;
+        }
     }
 
     DecisionMaker::~DecisionMaker()
@@ -110,24 +112,41 @@ namespace Decision
         //  x = 459;
         //  y = -5;
         //  yaw = 0;
-    if (bool switch_handle = root["json_switch_handle"].asBool() )
+    if ( root["json_switch_handle"].asBool() )
     {
-        x = root["start_x"].asFloat();
-        y = root["start_y"].asFloat();
-        yaw = root["start_yaw"].asFloat();
-
-        x =  handin.first;
-        y = handin.second;
+         if(root["origin_handover_switch"].asBool()) 
+                ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");    
+        x =  handin.x;
+        y = handin.y;
+        yaw = handin.heading;
     }
 
     if ( testflag_out  &&   root["json_switch_handle"].asBool() )
      {
-        x = root["alpout_start_x"].asFloat();
-        y = root["alpout_start_y"].asFloat();
-        yaw = root["alpout_start_yaw"].asFloat();
+           if(root["origin_handover_switch"].asBool()) 
+                ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");    
+            x = root["goal_x"].asFloat();
+            y = root["goal_y"].asFloat();
+            yaw = root["goal_yaw"].asFloat();
     }
         // yaw =  1.6;
+    if ( root["origin_handover_switch"].asBool() )
+    {
+        if(root["json_switch_handle"].asBool()) 
+            ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!"); 
+        x = root["origin_start_x"].asFloat();
+        y = root["origin_start_y"].asFloat();
+        yaw = root["origin_start_yaw"].asFloat();
+    }
 
+     if ( testflag_out   &&    root["origin_handover_switch"].asBool() )
+    {
+        if(root["json_switch_handle"].asBool()) 
+            ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");            
+        x = root["origin_goal_x"].asFloat();
+        y = root["origin_goal_y"].asFloat();
+        yaw = root["origin_goal_yaw"].asFloat();
+    }
 
         ROS_INFO("Got a new start at (%.2f, %.2f, %.2f)", x, y, yaw);
         int map_o_x = DM_Param->gridMap.info.origin.position.x;
@@ -166,52 +185,48 @@ namespace Decision
         float x = goalPoint->pose.position.x / HybridAStar::Constants::cellSize;
         float y = goalPoint->pose.position.y / HybridAStar::Constants::cellSize;
         float yaw = tf::getYaw(goalPoint->pose.orientation);
-    
+        setMainRoad(root["up_csv_path"].asString(), root["down_csv_path"].asString());
     //--------test2022.3.30-------------
         if (  root["json_switch_handle"].asBool() )
         {
+            if(root["origin_handover_switch"].asBool()) 
+                ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");            
             x = root["goal_x"].asFloat();
             y = root["goal_y"].asFloat();
             yaw = root["goal_yaw"].asFloat();
 
-          
-            float dist = y;
-            std::pair <int, int> projection_point(0,0);
-            int backward_dist = root["backward_dist"].asInt();
-            std::pair <float, float>   backward_point(projection_point.first - backward_dist, projection_point.second);
-            std::pair <float, float> unit_vector(cos(yaw), sin(yaw));
-            float vector_weight = root["vector_weight"].asFloat();  
-            std::pair <float, float> direction_to_projection( projection_point.first - backward_point.first, projection_point.second - backward_point.second );
-            float offset = direction_to_projection.first*vector_weight*unit_vector.first + direction_to_projection.second*vector_weight*unit_vector.second; 
-            std::pair <float, float>  handover_in(backward_point.first*(1+  (dist - 30)/(150 - 30))+offset, backward_point.second);
-            handin  = handover_in;
-            ROS_INFO("Offset is  (%.2f)", offset);
-           
+            CSV_data handinpoint  = getHandoverPoint(x, y, yaw, testflag_out, root["handover_down_dist"].asFloat());
+            handin = handinpoint;
         }
         
      if ( testflag_out   &&   root["json_switch_handle"].asBool() )
         {
-             x = root["alpout_goal_x"].asFloat();
-             y = root["alpout_goal_y"].asFloat();
-            yaw = root["alpout_goal_yaw"].asFloat();
-
-    
-            x = handin.first - root["handover_down_dist"].asFloat();
-            y = handin.second + 20;
-
+           if(root["origin_handover_switch"].asBool()) 
+                ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");            
+            CSV_data handoverpoint  = getHandoverPoint(x, y, yaw, testflag_out, root["handover_down_dist"].asFloat());
+            x = handoverpoint.x;
+            y = handoverpoint.y;
+            yaw = handoverpoint.heading;
         }
 
-        //  x = 512;
-        //  y = 35;
-        //  yaw =-3.14*0.5;
+        if (  root["origin_handover_switch"].asBool() )
+        {
+            if(root["json_switch_handle"].asBool()) 
+                ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");
+            x = root["origin_goal_x"].asFloat();
+            y = root["origin_goal_y"].asFloat();
+            yaw = root["origin_goal_yaw"].asFloat();
+        }
 
-        // x = -35;
-        // y = 175;
-        // yaw = 0;
+     if ( testflag_out   &&    root["origin_handover_switch"].asBool() )
+        {
+            if(root["json_switch_handle"].asBool()) 
+                ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");            
+              x = root["origin_alpout_goal_x"].asFloat();
+              y = root["origin_alpout_goal_y"].asFloat();
+             yaw = root["origin_alpout_goal_yaw"].asFloat();
+        }
 
-        // x =  -20.25;
-        // y = 176.1;
-        // yaw =  0.01;
         ROS_INFO("Got a new goal at (%.2f, %.2f, %.2f)", x, y, yaw);
         int map_o_x = DM_Param->gridMap.info.origin.position.x ;
         int map_o_y = DM_Param->gridMap.info.origin.position.y;
@@ -323,6 +338,174 @@ namespace Decision
     void DecisionMaker::setControlCmd(const vehicle_msgs::adm_lat controlCmd)
     {
         DM_state->setFinalCmdMsg(controlCmd);
+    }
+
+    void DecisionMaker::setMainRoad(std::string up_path, std::string down_path)
+    {
+        std::ifstream up_file(up_path);
+        std::ifstream down_file(down_path);
+        std::string one_line;
+        CSV_data line;
+        while ( getline(up_file, one_line) )
+        {
+            if ( !one_line.size())
+            {
+                break;
+            }
+            
+            std::istringstream sin(one_line);
+            std::vector<std::string> fields;
+            std::string field;
+            while (getline(sin, field, ',')) //将字符串流sin中的字符读入到field字符串中，以逗号为分隔符
+		    {
+			    fields.push_back(field); //将刚刚读取的字符串添加到向量fields中
+		    }
+            line.x = std::stof(fields[0]);
+            line.y = std::stof(fields[1]);
+            line.heading = std::stof(fields[2]);
+           // std::cout<< " line.heading before   " <<  line.heading << std::endl;
+            if(line.heading > 90 && line.heading < 270)
+            {
+                line.heading = -(line.heading-90)/180*3.14;
+                //std::cout<< " line.heading after   " <<  line.heading << std::endl;
+            }
+           else if (line.heading <=90)
+            {
+                line.heading = (90 - line.heading)/180*3.14;
+            }
+            else if (line.heading >= 270)
+            {
+                line.heading = (360-line.heading+90)/180*3.14;
+            }
+            up_road_.push_back(line);
+            //std::cout << "line.heading" <<line.heading <<  std::endl;
+            fields.clear();
+        }
+         while ( getline(down_file, one_line) )
+        {
+            if ( !one_line.size())
+            {
+                break;
+            }
+            std::istringstream sin(one_line);
+            std::vector<std::string> fields;
+            std::string field;
+            while (getline(sin, field, ',')) //将字符串流sin中的字符读入到field字符串中，以逗号为分隔符
+		    {
+			    fields.push_back(field); //将刚刚读取的字符串添加到向量fields中
+		    }
+            line.x = std::stof(fields[0]);
+            line.y = std::stof(fields[1]);
+            line.heading = std::stof(fields[2]);
+            if(line.heading > 90 && line.heading < 270)
+            {
+                line.heading = -(line.heading-90)/180*3.14;
+                //std::cout<< " line.heading after   " <<  line.heading << std::endl;
+            }
+           else if (line.heading <=90)
+            {
+                line.heading = (90 - line.heading)/180*3.14;
+            }
+            else if (line.heading >= 270)
+            {
+                line.heading = (360-line.heading+90)/180*3.14;
+            }
+            down_road_.push_back(line);
+            fields.clear();
+        }
+        if(!up_road_.size() || !down_road_.size()){
+            ROS_ERROR("main road infomation fail to get");
+        }
+    }
+
+    DecisionMaker::CSV_data DecisionMaker::getHandoverPoint(float x, float y ,float yaw, bool alp_out, float down_diff)
+    {
+        //std::map<int, float> Hashmap;
+        static CSV_data handover_in;
+        //find handoverOUT
+        float dist_min = INFINITY;
+        if (alp_out)
+        {
+            auto pos = down_road_.begin();
+                for (auto iter =down_road_.begin(); iter !=down_road_.end(); iter++)
+            {
+                float dist = sqrt((iter->x -  handover_in.x)*(iter->x -  handover_in.x) + (iter->y -  handover_in.y) * (iter->y -  handover_in.y));
+                //Hashmap.insert(std::make_pair(i,dist));
+                if ( dist < dist_min)
+                {
+                    dist_min = dist;
+                    pos = iter;
+                }
+            }
+            CSV_data in_projection_point = *pos;
+
+            float dist = 0;
+             for (auto iter = pos ; iter != down_road_.end(); iter++)
+            {
+                dist = sqrt((iter->x -  in_projection_point.x)*(iter->x -  in_projection_point.x) + (iter->y -  in_projection_point.y) * (iter->y -  in_projection_point.y));
+                if ( dist > down_diff )
+                {
+                    return *iter;
+                }
+            }
+        }
+
+        //find projection_point
+        auto pos = up_road_.begin();
+        for (auto iter = up_road_.begin(); iter != up_road_.end(); iter++)
+        {
+            float dist = sqrt((iter->x -  x)*(iter->x -  x) + (iter->y -  y) * (iter->y -  y));
+            //Hashmap.insert(std::make_pair(i,dist));
+            if ( dist < dist_min)
+            {
+                dist_min = dist;
+                pos = iter;
+            }
+        }
+        CSV_data projection_point = {pos->x, pos->y, pos->heading};
+        std::cout << "projection_point" << projection_point.x << "," << projection_point.y << "," <<  "," << projection_point.heading << std::endl;
+
+        int backward_dist = (1+  (dist_min - 30)/(150 - 30))*root["backward_dist"].asInt();
+        std::cout << "backward_dist" <<backward_dist << std::endl; 
+        //find back_point
+        float dist = 0;
+        for (auto iter = pos ; iter != up_road_.begin(); iter--)
+        {
+            dist = sqrt((iter->x -  projection_point.x)*(iter->x -  projection_point.x) + (iter->y -  projection_point.y) * (iter->y -  projection_point.y));
+            if ( dist >backward_dist )
+            {
+                pos = iter;
+                break;
+            }
+        }
+        if ( pos == up_road_.begin() ) 
+        {
+            handover_in = *pos;
+            return handover_in;
+        }
+        
+        CSV_data back_point = {pos->x, pos->y, pos->heading};
+        std::cout << "back_point" << back_point.x << "," <<back_point.y << "," <<  back_point.heading<< std::endl;
+
+        CSV_data back_point_vector = {projection_point.x - back_point.x,  projection_point.y- back_point.y,  back_point.heading};
+        std::pair <float, float> unit_vector(cos(yaw), sin(yaw));
+        float vector_weight = root["vector_weight"].asFloat();  
+        float offset = back_point_vector.x*vector_weight*unit_vector.first + back_point_vector.y*vector_weight*unit_vector.second; 
+        std::cout << "offset" <<offset << std::endl; 
+        //find handover_point
+        dist = 0;
+        for (auto iter = pos ; ; offset > 0 ? iter++:iter--)
+        {
+            dist = sqrt((iter->x -  back_point.x)*(iter->x -  back_point.x) + (iter->y -  back_point.y) * (iter->y -  back_point.y));
+            if ( dist > abs(offset) )
+            {
+                pos = iter;
+                break;
+            }
+        }
+        handover_in = *pos;
+        std::cout << "handover_in     " << handover_in.x << "," <<handover_in.y << "," << handover_in.heading <<std::endl;
+        return handover_in;
     }
 
     // void DecisionMaker::updateParam()

@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   hybrid_astar
 #   message_generation
   vehicle_msgs
+  roslib
 #   StatemachineMsg
 )
 
