@@ -88,6 +88,7 @@ add_library(hybrid_astar_lib
 target_link_libraries(hybrid_astar_lib
   ${catkin_LIBRARIES}
   ${OMPL_LIBRARIES}
+  jsoncpp
 )
 
 ## Add cmake target dependencies of the library
