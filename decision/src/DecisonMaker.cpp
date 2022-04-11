@@ -68,12 +68,14 @@ namespace Decision
         subReplanFlag = n.subscribe("/replan_flag", 1, &DecisionMaker::setReplanFlag, this);
         subDwaConCmd = n.subscribe("/dwa_planner/control_cmd", 1, &DecisionMaker::setControlCmd, this);
     
-        json_file_path = ros::package::getPath("decision") + "/json_files/start_and_goal.json";
+        std::string decision_package_path = ros::package::getPath("decision");
+        json_file_path = decision_package_path + "/json_files/start_and_goal.json";
         json_file.open(json_file_path);
         if (!json_reader.parse(json_file, root))
         {
             std::cout << "Error opening json file  : " << json_file_path << std::endl;
         }
+        setMainRoad(decision_package_path + "/json_files/up.csv", decision_package_path + "/json_files/down.csv");
     }
 
     DecisionMaker::~DecisionMaker()
@@ -112,7 +114,7 @@ namespace Decision
         //  x = 459;
         //  y = -5;
         //  yaw = 0;
-    if ( root["json_switch_handle"].asBool() )
+    if ( !testflag_out && root["json_switch_handle"].asBool() )
     {
          if(root["origin_handover_switch"].asBool()) 
                 ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");    
@@ -130,7 +132,7 @@ namespace Decision
             yaw = root["goal_yaw"].asFloat();
     }
         // yaw =  1.6;
-    if ( root["origin_handover_switch"].asBool() )
+    if ( !testflag_out && root["origin_handover_switch"].asBool() )
     {
         if(root["json_switch_handle"].asBool()) 
             ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!"); 
@@ -185,9 +187,8 @@ namespace Decision
         float x = goalPoint->pose.position.x / HybridAStar::Constants::cellSize;
         float y = goalPoint->pose.position.y / HybridAStar::Constants::cellSize;
         float yaw = tf::getYaw(goalPoint->pose.orientation);
-        setMainRoad(root["up_csv_path"].asString(), root["down_csv_path"].asString());
     //--------test2022.3.30-------------
-        if (  root["json_switch_handle"].asBool() )
+        if (  !testflag_out && root["json_switch_handle"].asBool() )
         {
             if(root["origin_handover_switch"].asBool()) 
                 ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");            
@@ -209,7 +210,7 @@ namespace Decision
             yaw = handoverpoint.heading;
         }
 
-        if (  root["origin_handover_switch"].asBool() )
+        if (  !testflag_out && root["origin_handover_switch"].asBool() )
         {
             if(root["json_switch_handle"].asBool()) 
                 ROS_ERROR("ERROR! origin_handover_switch AND json_switch_handle  ARE BOTH VALID!");
@@ -440,14 +441,23 @@ namespace Decision
             CSV_data in_projection_point = *pos;
 
             float dist = 0;
-             for (auto iter = pos ; iter != down_road_.end(); iter++)
+            for (auto iter = pos ; iter <  down_road_.end() ; iter++)
             {
                 dist = sqrt((iter->x -  in_projection_point.x)*(iter->x -  in_projection_point.x) + (iter->y -  in_projection_point.y) * (iter->y -  in_projection_point.y));
+                // std::cout <<iter->x << ", " << iter->y << std::endl;
+                // std::cout<<"down_road_.end()-1 "<< (down_road_.end())->x << std::endl;
                 if ( dist > down_diff )
                 {
+                    if (iter->x == down_road_.begin()->x)
+                    {
+                        break;
+                    }
+                    std::cout << "alp out handover point" << iter->x << "," << iter->y << "," << iter->heading << std::endl;
                     return *iter;
                 }
             }
+            std::cout << "out main road limited "  << std::endl;
+            return down_road_.back();
         }
 
         //find projection_point

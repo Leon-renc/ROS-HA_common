@@ -5,11 +5,11 @@ using namespace HybridAStar;
 // CONSTANT VALUES
 // possible directions
  const int Node3D::dir = 3;
-// const float Node3D::r = 13;
-// const float Node3D::deg = 7.0/ 180 * 3.1415926;
+const float Node3D::r = 13;
+const float Node3D::deg = 7.0/ 180 * 3.1415926;
 
- float Node3D::r = 17;
- float Node3D::deg = 7.0/ 180 * 3.1415926;
+//  float Node3D::r = 17;
+//  float Node3D::deg = 7.0/ 180 * 3.1415926;
 
 // possible movements
 //const float Node3D::dy[] = { 0,        -0.032869,  0.032869};
@@ -110,11 +110,11 @@ Node3D *Node3D::createSuccessor(const int i, const float dist)
   float tSucc;
 
   // calculate successor positions forward
-  if (dist > 1.5*Constants::reedssheppShot  )
-  {
-    Node3D::r = 20;
-    Node3D::deg = 9.0/ 180 * 3.1415926;
-  }
+  // if (dist > 1.5*Constants::reedssheppShot  )
+  // {
+  //   Node3D::r = 20;
+  //   Node3D::deg = 9.0/ 180 * 3.1415926;
+  // }
   
   if (i < 3)
   {

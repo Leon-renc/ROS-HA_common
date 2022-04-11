@@ -114,8 +114,8 @@ class Node3D {
   /// Possible movements regarding heading theta
   static const float dt[];
     //a star r and degree
-  static float r;
-  static float deg;
+  static const float r;
+  static const float deg;
 
  private:
   /// the x position

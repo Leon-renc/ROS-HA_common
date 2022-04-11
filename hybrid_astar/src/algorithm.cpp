@@ -53,10 +53,10 @@ Node3D *Algorithm::hybridAStar(Node3D &start,
   int iPred, iSucc;
   float newG;
   bool onlyFoward = false;
-    if(AlpOut)
+  if(AlpOut)
   {
      onlyFoward = true; 
-     dubinflag =false;
+     dubinflag = true;
   }
   // Number of possible directions, 3 for forward driving and an additional 3 for reversing
   int dir = onlyFoward ? 3 : 6;
@@ -212,7 +212,7 @@ Node3D *Algorithm::hybridAStar(Node3D &start,
         //if (Constants::reedssheppShot && nPred->isInRange(goal) && nPred->getPrim() < 3)
 
         // SEARCH WITH RS SHOT
-        if (Constants::reedssheppShot && nPred->isInRange(goal))
+        if (Constants::reedssheppShot && nPred->isInRange(goal) && !AlpOut)
         {
           // ros::Time t0 = ros::Time::now();
           //cout<<"nPred   : "<<nPred->getX()<<'\t'<<nPred->getY()<<'\t'<<nPred->getT()<<endl;
@@ -436,7 +436,7 @@ float aStar(Node2D &start,
       {
         visualization.publishNode2DPoses(*nPred);
         visualization.publishNode2DPose(*nPred);
-        //        d.sleep();
+               d.sleep();
       }
 
       // remove node from open list
@@ -683,6 +683,7 @@ void updateH(Node3D &start, const Node3D &goal, Node2D *nodes2D, float *dubinsLo
 //###################################################
 //                                        DUBINS SHOT
 //###################################################
+/*old_version
 Node3D* dubinsShot(Node3D& start, const Node3D& goal, CollisionDetection& configurationSpace) {
   // start
   double q0[] = { start.getX(), start.getY(), start.getT() };
@@ -726,6 +727,67 @@ Node3D* dubinsShot(Node3D& start, const Node3D& goal, CollisionDetection& config
       //      std::cout << "Dubins shot collided, discarding the path" << "\n";
       // delete all nodes
       delete [] dubinsNodes;
+      return nullptr;
+    }
+  }
+
+  //  std::cout << "Dubins shot connected, returning the path" << "\n";
+  return &dubinsNodes[i - 1];
+}
+*/
+Node3D *dubinsShot(Node3D &start, const Node3D &goal, CollisionDetection &configurationSpace)
+{
+  // start
+  double q0[] = {start.getX(), start.getY(), start.getT()};
+  // goal
+  double q1[] = {goal.getX(), goal.getY(), goal.getT()};
+  // initialize the path
+  DubinsPath path;
+  // calculate the path
+  dubins_init(q0, q1, 20, &path);
+
+  int i = 0;
+  float x = 0.f;
+  float length = dubins_path_length(&path);
+
+  Node3D *dubinsNodes = new Node3D[(int)(length / Constants::dubinsStepSize) +
+                                   1];
+
+  while (x < length)
+  {
+    double q[3];
+    dubins_path_sample(&path, x, q);
+    dubinsNodes[i].setX(q[0]);
+    dubinsNodes[i].setY(q[1]);
+    dubinsNodes[i].setT(Helper::normalizeHeadingRad(q[2]));
+
+    // collision check
+    if (configurationSpace.isTraversable(&dubinsNodes[i]))
+    {
+
+      // set the predecessor to the previous step
+      if (i > 0)
+      {
+        dubinsNodes[i].setPred(&dubinsNodes[i - 1]);
+      }
+      else
+      {
+        dubinsNodes[i].setPred(&start);
+      }
+
+      if (&dubinsNodes[i] == dubinsNodes[i].getPred())
+      {
+        std::cout << "looping shot";
+      }
+
+      x += Constants::dubinsStepSize;
+      i++;
+    }
+    else
+    {
+      //      std::cout << "Dubins shot collided, discarding the path" << "\n";
+      // delete all nodes
+      delete[] dubinsNodes;
       return nullptr;
     }
   }
