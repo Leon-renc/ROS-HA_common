@@ -81,3 +81,26 @@ bool CollisionDetection::configurationTest(float x, float y, float t)
   //std::cout << "debug!" << std::endl;
   return true;
 }
+
+void CollisionDetection::getObsInCircle(Node2D *current, int r ,std::vector<Node2D> *ptr )
+{
+  Node2D *node_tmp = new Node2D(*current);
+  //std::cout << " current node  " << node_tmp->getX() << "," << node_tmp->getY() << std::endl;
+  node_tmp->setX(node_tmp->getX() - r);
+  node_tmp->setY(node_tmp->getY() - r);
+  //std::cout << "Set node_tmp->ode to left down " << node_tmp->getX() << "," << node_tmp->getY() << std::endl;
+  for (int j = 0; j <  Node2D::dir_y ; j++)
+  {
+    for (int i = 0; i < Node2D::dir_x; i++)
+    {
+      if ( grid.data[node_tmp->getIdx()])
+      {
+        ptr->push_back(*node_tmp);
+      }
+      Node2D *tmp = node_tmp;
+      node_tmp = node_tmp->createSuccessor(i,j);
+      delete tmp;
+  }
+  }
+  delete node_tmp;
+}

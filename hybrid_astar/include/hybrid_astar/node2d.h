@@ -5,6 +5,8 @@
 
 #include "constants.h"
 #include "helper.h"
+#include <vector>
+#include <iostream>
 namespace HybridAStar {
 
 /*!
@@ -39,6 +41,8 @@ class Node2D {
   float getH() const { return h; }
   /// get the total estimated cost
   float getC() const { return g + h; }
+
+  float getW() const { return w; }
   /// get the index of the node in the 2D array
   int getIdx() const { return idx; }
   /// determine whether the node is open
@@ -59,6 +63,8 @@ class Node2D {
   void setG(const float& g) { this->g = g; }
   /// set the cost-to-come (heuristic value)
   void setH(const float& h) { this->h = h; }
+
+  void setW( const float& w) {this->w = w;}
   //--Mapping debug--
   //int setIdx(int width) { this->idx = y * width + x; return idx;}
   int setIdx(int width) { this->idx = (y-map_origin_y)/map_resolution * width + (x-map_origin_x)/map_resolution; return idx;}
@@ -92,6 +98,11 @@ class Node2D {
   // SUCCESSOR CREATION
   /// Creates a successor on a eight-connected grid.
   Node2D* createSuccessor(const int i);
+  Node2D* createSuccessor(const int i, const int r );
+  bool isReachable(const Node2D* nPred, const Node2D* goal);
+  bool willCollision(const Node2D* currentCenter, std::vector<Node2D>* obsInfo ,  const Node2D* goal);
+  bool meetDistanceAndScopeCondition(const Node2D* currentCenter, std::vector<Node2D>* obsInfo,  const Node2D* goal);
+  void calculateAndSetG( std::vector<Node2D>  &reachableGrid);
 
   // CONSTANT VALUES
   /// Number of possible directions
@@ -100,6 +111,10 @@ class Node2D {
   static const int dx[];
   /// Possible movements in the y direction
   static const int dy[];
+
+  static const int dir_x;
+  static const int dir_y;
+  static const int radius;
 
  private:
   /// the x position
@@ -118,6 +133,9 @@ class Node2D {
   bool c;
   /// the discovered value
   bool d;
+  ///the weight of G in varied step length A*
+  float w;
+
   /// the predecessor pointer
   Node2D* pred;
 };

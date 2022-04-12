@@ -345,6 +345,22 @@ Visualization Manager:
       Topic: /lastPath
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Arrow Length: 0.30000001192092896
+      Axes Length: 0.30000001192092896
+      Axes Radius: 0.009999999776482582
+      Class: rviz/PoseArray
+      Color: 117; 80; 123
+      Enabled: true
+      Head Length: 0.07000000029802322
+      Head Radius: 0.029999999329447746
+      Name: PoseArray
+      Shaft Length: 0.23000000417232513
+      Shaft Radius: 0.009999999776482582
+      Shape: Arrow (Flat)
+      Topic: /visualizeNodes2DPoses
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -385,8 +401,8 @@ Visualization Manager:
       Scale: 4.4426422119140625
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 14.987053871154785
       Y: 192.0043487548828
+      X: 14.987053871154785
     Saved: ~
 Window Geometry:
   Displays:

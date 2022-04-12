@@ -58,7 +58,7 @@ public:
     // 2D collision test
     if (t == 99)
     {
-      return !grid.data[node->getIdx()];
+      return !grid.data[node->getIdx()]; 
     }
 
     if (true)
@@ -172,7 +172,7 @@ public:
         }
     }
   }
-  
+  void getObsInCircle(Node2D *current, int r ,std::vector<Node2D> *ptr );
 
 private:
   /// The occupancy grid
