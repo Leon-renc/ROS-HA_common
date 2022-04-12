@@ -76,6 +76,7 @@ namespace Decision
             std::cout << "Error opening json file  : " << json_file_path << std::endl;
         }
         setMainRoad(decision_package_path + "/json_files/up.csv", decision_package_path + "/json_files/down.csv");
+        //setMainRoad2Obs(); //要将泊人路线设置成为障碍物需要手动设定参数
     }
 
     DecisionMaker::~DecisionMaker()
@@ -516,6 +517,26 @@ namespace Decision
         handover_in = *pos;
         std::cout << "handover_in     " << handover_in.x << "," <<handover_in.y << "," << handover_in.heading <<std::endl;
         return handover_in;
+    }
+
+    void DecisionMaker::setMainRoad2Obs()
+    {
+        int width = 505;
+        int map_resolution = 1;
+        std::ofstream fpath;
+        std::string file_path = "/home/rcx/HA_common/src/json_files/mainroad_path.json";
+        Json::Value root;
+
+        for (auto iter = up_road_.begin(); iter != up_road_.end(); iter++)
+        {
+            int index = static_cast<int>((iter->y+106.52906799316406)/map_resolution)*width + static_cast<int>((iter->x + 265.83874130249023)/map_resolution);
+            root["index"].append(index);
+        }
+        fpath.open(file_path);
+        Json::StyledWriter sw;
+        fpath << sw.write(root);
+        fpath.close();
+    
     }
 
     // void DecisionMaker::updateParam()

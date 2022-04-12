@@ -327,6 +327,7 @@ void Planner::plan()
         //PUBLISH CHOSEN POINTS
         // path.generatePoints(smoother.getPath());
         path.publishPathPoints(smoother.getPath());
+        /*
         if(ALPOut){
             std::ofstream fpath;
             std::string file_path = "/home/rcx/HA_common/src/json_files/alpout_path.json";
@@ -342,7 +343,7 @@ void Planner::plan()
             fpath << sw.write(root);
            fpath.close();
         }
-
+*/
          t0 = ros::Time::now();
         if (smooth_flag)
         {

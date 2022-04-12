@@ -73,6 +73,7 @@ namespace Decision
 
         void setMainRoad(std::string, std::string);
         CSV_data getHandoverPoint(float, float, float, bool, float);
+        void setMainRoad2Obs();
 
         
         
